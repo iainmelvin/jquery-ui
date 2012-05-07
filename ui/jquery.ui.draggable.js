@@ -582,7 +582,25 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 			this.instance.helperProportions = inst.helperProportions;
 			this.instance.offset.click = inst.offset.click;
 			
-			if(this.instance._intersectsWith(this.instance.containerCache)) {
+			var bIntersect=this.instance._intersectsWith(this.instance.containerCache);
+
+                        // if 'this' sortable intersects, don't count if any children of 'this' also intersect
+                        // otherwise element will be dropped into all nested lists
+			var t=this;
+			$.each(inst.sortables, function(i) {
+				if (t!=this && $(t.instance.element).find(this.instance.element).length > 0 ){
+
+					//As before, copy over some variables to allow calling the sortable's native _intersectsWith
+					this.instance.positionAbs = inst.positionAbs;
+					this.instance.helperProportions = inst.helperProportions;
+					this.instance.offset.click = inst.offset.click;
+					if (this.instance._intersectsWith(this.instance.containerCache)){
+						bIntersect=false;
+					}
+				}
+			});
+			
+			if(bIntersect)) {
 
 				//If it intersects, we use a little isOver variable and set it once, so our move-in stuff gets fired only once
 				if(!this.instance.isOver) {
